@@ -15,6 +15,10 @@ if(MSVC)
 	set_target_properties(QuantLibJNI PROPERTIES COMPILE_FLAGS "/bigobj")
 endif(MSVC)
 
+if(WIN32 AND NOT MSVC)
+	set_target_properties(QuantLibJNI PROPERTIES LINK_FLAGS "-Wl,--kill-at")
+endif(WIN32 AND NOT MSVC)
+
 file(GLOB java_sources "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-SWIG-1.2/Java/org/quantlib/*.java")
 
 add_custom_command(
@@ -36,8 +40,6 @@ add_custom_target(
 
 install(TARGETS QuantLibJNI
 	RUNTIME DESTINATION bin 
-	LIBRARY DESTINATION lib 
-	ARCHIVE DESTINATION lib
 )
 
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/JQuantLib.jar DESTINATION bin)
