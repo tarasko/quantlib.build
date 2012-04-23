@@ -32,3 +32,11 @@ if(NOT WIN32)
 	# TODO
 	# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)	
 endif(NOT WIN32)
+
+# Add examples
+file(GLOB_RECURSE examples "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/Examples/*.cpp")
+foreach(example ${examples})
+	string(REGEX REPLACE ".*/Examples/(.*)/.*" "QuantLib.examples.\\1" target "${example}")
+	add_executable(${target} ${example})
+	target_link_libraries(${target} QuantLib.s)
+endforeach(example)
