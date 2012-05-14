@@ -23,7 +23,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/stage/lib)
 set(MY_OWN_INSTALL_PREFIX "install" CACHE PATH "Prefix prepended to install directories")
 set(CMAKE_INSTALL_PREFIX "${MY_OWN_INSTALL_PREFIX}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
 
-find_package(Boost 1.49)
+if(ADD_TESTS)
+	set(Boost_USE_STATIC_LIBS ON)
+	find_package(Boost 1.49 COMPONENTS unit_test_framework REQUIRED)
+else(ADD_TESTS)
+	find_package(Boost 1.49 REQUIRED)
+endif(ADD_TESTS)
 
 add_definitions(-DQL_NO_AUTO_LINK)
 
