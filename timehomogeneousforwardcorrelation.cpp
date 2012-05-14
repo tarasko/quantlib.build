@@ -59,8 +59,8 @@ namespace QuantLib {
             // Workaround for Intel compiler optimization bug
 #ifdef __INTEL_COMPILER            
             {
-                volatile float c = 1.0
-                correlations[k][i][i] = 1.0;
+                volatile float c = 1;
+                correlations[k][i][i] = c;
             }
 #else
                 correlations[k][i][i] = 1.0;
