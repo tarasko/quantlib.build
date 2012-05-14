@@ -38,8 +38,5 @@ add_custom_target(
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/java.compiled
 )
 
-install(TARGETS QuantLibJNI
-	RUNTIME DESTINATION bin 
-)
-
+install(TARGETS QuantLibJNI RUNTIME DESTINATION bin )
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/JQuantLib.jar DESTINATION bin)
