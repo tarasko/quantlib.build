@@ -5,18 +5,17 @@ set(QUANTLIB_DEFINITIONS "-DQL_NO_AUTO_LINK")
 #	QuantLib (only on Unix)
 #	QuantLib.s
 
-# Copy patched auto_link.hpp
+# Patch QuantLib
 # This prevent auto-linking of Quanlib when compile for msvc
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/auto_link.hpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql)
-
 # Fix runtime error when compile with Intel + MSVC for debug
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/qldefines.hpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql)
-
 # Workaround for Intel bug related to /Ob1 flag 
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/singleton.hpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql/patterns)
-
 # Workaround for Intel bug related to interprocedural optimization
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/timehomogeneousforwardcorrelation.cpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql/models/marketmodels/correlations)
+add_custom_command(OUTPUT quantlib.patched
+	COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/auto_link.hpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql
+	COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/qldefines.hpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql
+	COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/singleton.hpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql/patterns
+	COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/timehomogeneousforwardcorrelation.cpp ${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/ql/models/marketmodels/correlations
+	COMMAND ${CMAKE_COMMAND} ARGS -E touch quantlib.patched)
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
@@ -35,10 +34,12 @@ endforeach(src ${sources} ${headers})
 
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_library(QuantLib.s STATIC ${headers} ${sources})
+add_dependencies(QuantLib.s quantlib.patched)
 
 if(NOT WIN32)
 	# Quantlib doesn`t support dll
 	add_library(QuantLib SHARED ${headers} ${sources})
+	add_dependencies(QuantLib quantlib.patched)
 
 	install(TARGETS QuantLib.s
 		RUNTIME DESTINATION bin 
@@ -67,7 +68,7 @@ if(ADD_TESTS)
 	add_library(QuantLib.unittestlib STATIC ${test_sources})
 	add_executable(QuantLib.unittest "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/quantlibtestsuite.cpp")
 	add_executable(QuantLib.benchmarktest "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/quantlibbenchmark.cpp")
-	target_link_libraries(QuantLib.unittest ${Boost_LIBRARIES} QuantLib.s QuantLib.unittestlib)
-	target_link_libraries(QuantLib.benchmarktest ${Boost_LIBRARIES} QuantLib.s QuantLib.unittestlib)
+	target_link_libraries(QuantLib.unittest QuantLib.unittestlib QuantLib.s ${Boost_LIBRARIES})
+	target_link_libraries(QuantLib.benchmarktest QuantLib.unittestlib QuantLib.s ${Boost_LIBRARIES})
 	set_target_properties(QuantLib.unittest QuantLib.benchmarktest PROPERTIES COMPILE_DEFINITIONS "QL_LIB_NAME=\"QuantLib\"")
 endif(ADD_TESTS)
