@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 
-project("quantlib.build")
+if(PACKAGE_SUFFIX)
+	set(PROJECT_NAME quantlib.build-${PACKAGE_SUFFIX})
+else(PACKAGE_SUFFIX)
+	set(PROJECT_NAME quantlib.build)
+endif(PACKAGE_SUFFIX)
+
+project(${PROJECT_NAME})
 
 #-----------------------------------------------------------------------------
 # force off-tree build
@@ -34,6 +40,8 @@ add_definitions(-DQL_NO_AUTO_LINK)
 
 if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+else(MSVC)
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer -march=native")
 endif(MSVC)
 
 include(quantlib.cmake)

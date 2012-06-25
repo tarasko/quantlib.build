@@ -60,15 +60,22 @@ if(QUANTLIB_ADD_EXAMPLES)
 	endforeach(example)
 endif(QUANTLIB_ADD_EXAMPLES)
 
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS_RELEASE "-fomit-frame-pointer -march=native")
+endif(NOT MSVC)
+
 # Add tests
 if(ADD_TESTS)
 	file(GLOB test_sources "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/*.hpp")
 	list(REMOVE_ITEM test_sources "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/quantlibbenchmark.cpp")
 	list(REMOVE_ITEM test_sources "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/quantlibtestsuite.cpp")
+	
 	add_library(QuantLib.unittestlib STATIC ${test_sources})
 	add_executable(QuantLib.unittest "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/quantlibtestsuite.cpp")
 	add_executable(QuantLib.benchmarktest "${CMAKE_CURRENT_SOURCE_DIR}/QuantLib-1.2/test-suite/quantlibbenchmark.cpp")
 	target_link_libraries(QuantLib.unittest QuantLib.unittestlib QuantLib.s ${Boost_LIBRARIES})
 	target_link_libraries(QuantLib.benchmarktest QuantLib.unittestlib QuantLib.s ${Boost_LIBRARIES})
 	set_target_properties(QuantLib.unittest QuantLib.benchmarktest PROPERTIES COMPILE_DEFINITIONS "QL_LIB_NAME=\"QuantLib\"")
+	
+	install(TARGETS QuantLib.benchmarktest RUNTIME DESTINATION bin)
 endif(ADD_TESTS)
